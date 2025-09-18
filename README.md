@@ -1,7 +1,6 @@
 # coding-in-parallel
 
-`coding-in-parallel` is a reference implementation of the SWE Fix Agent described in the
-project specification. It focuses on deterministic orchestration for SWE-bench Verified tasks,
+`coding-in-parallel` is an implementation of a bug fixing agent that attempts to break bug fixing (or in the future feature development) by using AST to localize potential fix locations, then reasoning in parallel to investigate each of those. Once that is complete, it will put together to create a plan of action of resolution, which will then use gated transactions. If a potential change is made and does not pass quality gates, it is reverted and attempt to rewrite. It focuses on deterministic orchestration for SWE-bench Verified tasks,
 including AST-guided localisation, planning, diff synthesis, and transactional execution with
 git-based rollbacks.
 
