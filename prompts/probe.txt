@@ -1,0 +1,2 @@
+For task {instance_id} candidate {candidate_id} (hypothesis: {hypothesis}),
+return a probe JSON object with notes and assumptions summarising the investigation.

@@ -1,0 +1,2 @@
+You are the AST investigator. Given failing tests {failing_tests} for task {instance_id},
+return a JSON array of candidate spans with keys id, hypothesis, spans, and evidence.
