@@ -27,6 +27,28 @@ Run the test suite with `pytest`:
 pytest
 ```
 
+### Running the agent
+
 The CLI entrypoint `coding-in-parallel` can be invoked manually once configured with a
-SWE-bench instance JSON and repository checkout.
+SWE-bench instance JSON and repository checkout. The configuration file defaults to
+`./config.yaml`, but you can supply an alternative path with `--config`:
+
+```bash
+coding-in-parallel \
+  --repo /path/to/repo \
+  --task /path/to/instance.json \
+  --out /tmp/patch.diff \
+  --test-cmd "pytest -q" \
+  --config config.yaml
+```
+
+Model providers require credentials. For the default OpenAI configuration, export:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export OPENAI_API_BASE="https://api.openai.com/v1"  # optional override
+```
+
+Then provide a client implementation that consumes these variables via
+`coding_in_parallel.llm.set_client(...)` before running the agent.
 

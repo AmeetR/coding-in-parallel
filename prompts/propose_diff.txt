@@ -1,5 +1,16 @@
-You must return a JSON list (length <= {k}) of objects with step_id, unified_diff, rationale.
-Step intent: {step}
-Target files: {spans}
-Context:
+You are editing code to satisfy the plan intent below.
+
+Output JSON ONLY: a list (length <= {k}) of objects with keys
+"step_id" (string), "unified_diff" (string), and "rationale" (<=40 words).
+
+Requirements for each "unified_diff":
+* MUST start with "diff --git" and contain at least one "@@" hunk.
+* MUST edit only these files/line ranges: 
+{span_summary}
+* MUST keep total changed lines <= {max_loc}.
+* MUST NOT include prose or code outside the provided context slices.
+
+Plan intent: {step}
+
+Context snippets:
 {context}

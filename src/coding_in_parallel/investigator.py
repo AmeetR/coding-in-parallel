@@ -28,20 +28,39 @@ def recall_candidates(ctx: types.TaskContext) -> List[types.Candidate]:
         "failing_tests": ctx.failing_tests,
     }
     response = llm.complete(prompt.format(**payload))
-    raw_candidates = json.loads(response or "[]")
+    try:
+        parsed = json.loads(response or "{}")
+    except json.JSONDecodeError as exc:  # pragma: no cover - guard rails
+        raise ValueError(f"Investigator returned non-JSON output: {exc}") from exc
+    if isinstance(parsed, list):
+        raw_candidates = parsed
+    elif isinstance(parsed, dict):
+        raw_candidates = parsed.get("candidates", [])
+    else:
+        raise ValueError("Recall output must be a JSON object with 'candidates'.")
+    if not isinstance(raw_candidates, list):
+        raise ValueError("'candidates' must be a JSON array.")
     candidates: List[types.Candidate] = []
     for raw in raw_candidates:
-        spans = [
-            types.AstSpan(
-                file=span["file"],
-                start_line=span["start_line"],
-                end_line=span["end_line"],
-                node_type=span["node_type"],
-                symbol=span.get("symbol"),
-                score=span.get("score"),
+        if not isinstance(raw, dict):
+            raise ValueError("Each candidate must be a JSON object.")
+        raw_spans = raw.get("spans", [])
+        if not isinstance(raw_spans, list):
+            raise ValueError("Candidate 'spans' must be a list.")
+        spans = []
+        for span in raw_spans:
+            if not isinstance(span, dict):
+                raise ValueError("Each span must be a JSON object.")
+            spans.append(
+                types.AstSpan(
+                    file=span["file"],
+                    start_line=span["start_line"],
+                    end_line=span["end_line"],
+                    node_type=span["node_type"],
+                    symbol=span.get("symbol"),
+                    score=span.get("score"),
+                )
             )
-            for span in raw.get("spans", [])
-        ]
         candidates.append(
             types.Candidate(
                 id=raw.get("id", f"cand-{len(candidates)+1}"),

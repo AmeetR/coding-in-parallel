@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Iterable
 
-from . import controller, types
+from . import config as config_module, controller, types
 
 
 def _parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
@@ -16,6 +16,11 @@ def _parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--task", required=True, help="Path to SWE-bench task JSON")
     parser.add_argument("--out", required=True, help="Where to write the final patch")
     parser.add_argument("--test-cmd", required=True, help="Command used for targeted tests")
+    parser.add_argument(
+        "--config",
+        default=None,
+        help="Path to YAML configuration file (defaults to ./config.yaml if omitted)",
+    )
     return parser.parse_args(list(args) if args is not None else None)
 
 
@@ -30,7 +35,8 @@ def main(argv: Iterable[str] | None = None) -> None:
         instance_id=task_data.get("instance_id", "unknown"),
         metadata=task_data.get("metadata", {}),
     )
-    result = controller.run_controller(ctx)
+    cfg = config_module.Config.load(ns.config)
+    result = controller.run_controller(ctx, config=cfg)
     Path(ns.out).write_text(result.final_patch)
 
 
