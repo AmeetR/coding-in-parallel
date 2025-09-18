@@ -3,7 +3,7 @@ import subprocess
 
 import pytest
 
-from coding_in_parallel import controller, investigator, planner, proposer, tnr, types
+from coding_in_parallel import config as config_module, controller, investigator, planner, proposer, tnr, types
 
 
 def _init_git_repo(path: Path) -> None:
@@ -54,9 +54,9 @@ def test_run_controller_applies_committed_diff(monkeypatch: pytest.MonkeyPatch, 
     monkeypatch.setattr(investigator, "probe", lambda ctx, cands: cands)
     monkeypatch.setattr(planner, "synthesize", lambda cands: types.Understanding("Fix add", [], []))
     monkeypatch.setattr(planner, "plan", lambda understanding: [step])
-    monkeypatch.setattr(proposer, "propose", lambda step, ctx_files, k: [diff])
+    monkeypatch.setattr(proposer, "propose", lambda step, ctx_files, config: [diff])
 
-    def fake_txn(context, plan_step, proposals, *, max_actions=3):
+    def fake_txn(context, plan_step, proposals, *, config):
         return tnr.TransactionResult(
             committed=True,
             applied_diff=diff,
@@ -66,7 +66,8 @@ def test_run_controller_applies_committed_diff(monkeypatch: pytest.MonkeyPatch, 
 
     monkeypatch.setattr(tnr, "txn_patch", fake_txn)
 
-    result = controller.run_controller(ctx)
+    cfg = config_module.Config.default()
+    result = controller.run_controller(ctx, config=cfg)
     assert result.final_patch == diff.unified_diff
     assert result.transactions[0].committed
 

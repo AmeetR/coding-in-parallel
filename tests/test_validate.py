@@ -4,7 +4,7 @@ from coding_in_parallel import types, validate
 
 
 VALID_DIFF = """diff --git a/mod.py b/mod.py
-@@
+@@ -1,2 +1,2 @@
 -def add(x, y):
 -    return x - y
 +def add(x, y):
@@ -37,6 +37,20 @@ def test_within_limits_raises_for_too_many_files():
             max_loc=6,
             max_files=1,
             target_spans=[span],
+        )
+
+
+def test_within_limits_rejects_lines_outside_span():
+    diff = """diff --git a/mod.py b/mod.py\n@@ -50,0 +50,2 @@\n+print('out of range')\n"""
+    span = types.AstSpan(file="mod.py", start_line=1, end_line=10, node_type="Module")
+    with pytest.raises(validate.ValidationError):
+        validate.ensure_within_limits(
+            diff,
+            allowed_files={"mod.py"},
+            max_loc=5,
+            max_files=1,
+            target_spans=[span],
+            padding_lines=0,
         )
 
 

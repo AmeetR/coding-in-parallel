@@ -6,10 +6,7 @@ import subprocess
 from dataclasses import dataclass, field
 from typing import Iterable, List
 
-from . import gates, types, validate, vcs
-
-_MAX_LOC = 12
-_MAX_FILES = 2
+from . import config as config_module, gates, types, validate, vcs
 
 
 @dataclass
@@ -41,54 +38,80 @@ def txn_patch(
     step: types.PlanStep,
     proposals: Iterable[types.DiffProposal],
     *,
-    max_actions: int = 3,
+    config: config_module.Config,
 ) -> TransactionResult:
     """Attempt to apply one of the provided diff proposals as a transaction."""
 
     repo_path = ctx.repo_path
     head = vcs.checkpoint(repo_path)
-    mu_pre = _measure_mu(repo_path)
     allowed_files = {span.file for span in step.target_spans}
+    logs: List[str] = []
+
+    if config.gates.targeted_tests:
+        baseline_ok, baseline_output = gates.run_targeted_tests(ctx.test_cmd, repo_path)
+        if not baseline_ok:
+            logs.append(f"baseline targeted tests failing: {baseline_output.strip()}")
+        mu_pre = 0 if baseline_ok else 1
+    else:
+        mu_pre = _measure_mu(repo_path)
 
     for attempt, proposal in enumerate(proposals, start=1):
-        if attempt > max_actions:
+        if attempt > max(1, config.tnr.actions_per_txn):
+            logs.append("Reached transaction action budget; stopping attempts.")
             break
         try:
             validate.ensure_within_limits(
                 proposal.unified_diff,
                 allowed_files=allowed_files,
-                max_loc=_MAX_LOC,
-                max_files=_MAX_FILES,
+                max_loc=config.limits.max_loc_changes,
+                max_files=config.limits.max_files_per_diff,
                 target_spans=step.target_spans,
+                padding_lines=config.limits.slice_padding_lines,
             )
-        except validate.ValidationError as exc:  # pragma: no cover - guard rails
-            return TransactionResult(False, None, mu_pre, mu_pre, logs=[str(exc)])
+        except validate.ValidationError as exc:
+            logs.append(f"validation failed: {exc}")
+            continue
 
         try:
             vcs.apply_diff(proposal.unified_diff, repo_path)
         except RuntimeError as exc:
+            logs.append(f"git apply failed: {exc}")
             vcs.revert(repo_path, head)
-            return TransactionResult(False, None, mu_pre, mu_pre, logs=[str(exc)])
+            continue
 
-        ok, output = gates.run_static_checks(repo_path)
-        if not ok:
+        mu_candidate = None
+        if not config.gates.targeted_tests:
+            mu_candidate = _measure_mu(repo_path)
+            if config.tnr.require_mu_nonworsening and mu_candidate > mu_pre:
+                logs.append(f"mu worsened from {mu_pre} to {mu_candidate}; rolling back.")
+                vcs.revert(repo_path, head)
+                continue
+
+        if config.gates.static:
+            ok, output = gates.run_static_checks(repo_path)
+            if not ok:
+                logs.append(f"static checks failed: {output.strip()}")
+                vcs.revert(repo_path, head)
+                continue
+
+        if config.gates.targeted_tests:
+            ok, output = gates.run_targeted_tests(ctx.test_cmd, repo_path)
+            mu_post = 0 if ok else 1
+            if not ok:
+                logs.append(f"targeted tests failed: {output.strip()}")
+                vcs.revert(repo_path, head)
+                continue
+        else:
+            mu_post = mu_candidate if mu_candidate is not None else _measure_mu(repo_path)
+        if config.tnr.require_mu_nonworsening and mu_post > mu_pre:
+            logs.append(f"mu worsened from {mu_pre} to {mu_post}; rolling back.")
             vcs.revert(repo_path, head)
-            return TransactionResult(False, None, mu_pre, mu_pre, logs=[output])
+            continue
 
-        ok, output = gates.run_targeted_tests(ctx.test_cmd, repo_path)
-        if not ok:
-            vcs.revert(repo_path, head)
-            return TransactionResult(False, None, mu_pre, mu_pre, logs=[output])
-
-        vcs.stage_all(repo_path)
         vcs.commit(repo_path, f"txn:{step.id}")
-        mu_post = _measure_mu(repo_path)
-        if mu_post <= mu_pre:
-            return TransactionResult(True, proposal, mu_pre, mu_post)
-        # if mu worsened, rollback and continue.
-        vcs.revert(repo_path, head)
+        return TransactionResult(True, proposal, mu_pre, mu_post, logs=logs)
 
     vcs.revert(repo_path, head)
-    return TransactionResult(False, None, mu_pre, mu_pre)
+    return TransactionResult(False, None, mu_pre, mu_pre, logs=logs)
 
 

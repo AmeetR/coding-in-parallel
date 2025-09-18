@@ -32,7 +32,7 @@ def test_main_cli_writes_patch_file(monkeypatch: pytest.MonkeyPatch, tmp_path: P
     instance_path.write_text(json.dumps(instance))
     output_path = tmp_path / "patch.diff"
 
-    def fake_run_controller(ctx: types.TaskContext):
+    def fake_run_controller(ctx: types.TaskContext, *, config):
         return controller.ControllerResult(
             final_patch="diff --git a/mod.py b/mod.py\n",
             transactions=[],

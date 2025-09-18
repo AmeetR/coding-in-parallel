@@ -29,26 +29,29 @@ def _make_ctx(repo_path: Path) -> types.TaskContext:
 def test_recall_candidates_parses_llm_output(monkeypatch: pytest.MonkeyPatch, repo_with_bug: Path):
     ctx = _make_ctx(repo_with_bug)
     response = json.dumps(
-        [
-            {
-                "id": "cand-1",
-                "hypothesis": "The function subtracts instead of adds.",
-                "spans": [
-                    {
-                        "file": "mod.py",
-                        "start_line": 1,
-                        "end_line": 2,
-                        "node_type": "FunctionDef",
-                        "symbol": "add",
-                    }
-                ],
-                "evidence": {"score": 0.8},
-            }
-        ]
+        {
+            "candidates": [
+                {
+                    "id": "cand-1",
+                    "hypothesis": "The function subtracts instead of adds.",
+                    "spans": [
+                        {
+                            "file": "mod.py",
+                            "start_line": 1,
+                            "end_line": 2,
+                            "node_type": "FunctionDef",
+                            "symbol": "add",
+                            "score": 0.8,
+                        }
+                    ],
+                    "evidence": {"score": 0.8},
+                }
+            ]
+        }
     )
 
     def fake_complete(prompt: str, **_: object) -> str:
-        assert "ast" in prompt.lower()
+        assert "Return JSON ONLY" in prompt
         return response
 
     monkeypatch.setattr(llm, "complete", fake_complete)

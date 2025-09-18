@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from coding_in_parallel import proposer, llm, types
+from coding_in_parallel import config as config_module, llm, proposer, types
 
 
 def test_propose_returns_diff_list(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
@@ -19,7 +19,7 @@ def test_propose_returns_diff_list(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
     )
 
     def fake_complete(prompt: str, **_: object) -> str:
-        assert "diff" in prompt.lower()
+        assert "Output JSON ONLY" in prompt
         return response
 
     monkeypatch.setattr(llm, "complete", fake_complete)
@@ -35,6 +35,11 @@ def test_propose_returns_diff_list(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
         ideal_outcome="add returns sum",
         check="tests",
     )
-    proposals = proposer.propose(step, {"mod.py": "def add(x, y):\n    return x - y\n"}, 1)
+    cfg = config_module.Config.default()
+    proposals = proposer.propose(
+        step,
+        {"mod.py": "LINES 1-2:\n   1: def add(x, y):\n   2:     return x - y"},
+        config=cfg,
+    )
     assert proposals and proposals[0].rationale.startswith("Swap")
 

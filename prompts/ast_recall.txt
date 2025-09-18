@@ -1,2 +1,10 @@
-You are the AST investigator. Given failing tests {failing_tests} for task {instance_id},
-return a JSON array of candidate spans with keys id, hypothesis, spans, and evidence.
+You are the AST investigator for task {instance_id} with failing tests {failing_tests}.
+Return JSON ONLY in the shape:
+{{"candidates":[
+  {{"id":"<short-id>",
+    "hypothesis":"<=20 words",
+    "spans":[{{"file":"<path>","start_line":N,"end_line":N,"node_type":"<AST node>","symbol":null,"score":1.0}}],
+    "evidence":{{"trace":"...","tests":"..."}}
+  }}
+]}}
+Do not include prose before or after the JSON. Ensure numeric fields are integers.
