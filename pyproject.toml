@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coding-in-parallel"
+version = "0.1.0"
+description = "Transactional SWE-bench fixer agent"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "OpenAI", email = "support@openai.com"}]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+coding-in-parallel = "coding_in_parallel.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

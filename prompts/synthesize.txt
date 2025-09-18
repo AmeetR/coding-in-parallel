@@ -1,0 +1,2 @@
+SYNTHESIZE the following candidate hypotheses into JSON with keys summary, invariants, dependencies:
+{candidates}

@@ -1,0 +1,21 @@
+model:
+  provider: "openai"
+  name: "gpt-5-reasoning"
+search:
+  max_steps: 4
+  diffs_per_step: 6
+  finalists: 2
+  retries_per_step: 1
+limits:
+  max_loc_changes: 12
+  max_files_per_diff: 2
+  slice_padding_lines: 80
+tnr:
+  actions_per_txn: 3
+  require_mu_nonworsening: true
+gates:
+  static: true
+  targeted_tests: true
+  smoke: false
+logging:
+  dir: ".agent_runs"

@@ -1,0 +1,5 @@
+You must return a JSON list (length <= {k}) of objects with step_id, unified_diff, rationale.
+Step intent: {step}
+Target files: {spans}
+Context:
+{context}
