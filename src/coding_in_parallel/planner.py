@@ -35,10 +35,15 @@ def synthesize(candidates: Iterable[types.Candidate]) -> types.Understanding:
 
 
 def plan(understanding: types.Understanding) -> List[types.PlanStep]:
-    """Request a list of plan steps from the LLM."""
+    """Request a list of plan steps from the LLM using the dedicated plan prompt."""
 
-    template = _load_prompt("synthesize.txt")
-    prompt = f"{template}\nPLAN: {understanding.summary}"
+    template = _load_prompt("plan.txt")
+    payload = {
+        "summary": understanding.summary,
+        "invariants": understanding.invariants,
+        "dependencies": understanding.dependencies,
+    }
+    prompt = template.format(**payload)
     response = llm.complete(prompt)
     items = json.loads(response or "[]")
     steps: List[types.PlanStep] = []

@@ -1,0 +1,16 @@
+Given this understanding of the problem:
+
+SUMMARY: {summary}
+INVARIANTS: {invariants}
+DEPENDENCIES: {dependencies}
+
+Generate a structured plan as JSON array of steps. Each step should have:
+
+- id: unique identifier
+- intent: what the step aims to achieve
+- target_spans: array of file/line ranges to edit, each with file, start_line, end_line, node_type, symbol (optional)
+- constraints: list of constraints this step must respect
+- ideal_outcome: description of success
+- check: how to verify this step ("tests", "static", etc.)
+
+Keep the plan to 2-4 atomic steps that build on each other. Focus on minimal, targeted changes.

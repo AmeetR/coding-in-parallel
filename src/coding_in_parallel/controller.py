@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List
 
-from . import config as config_module, investigator, planner, proposer, tnr, types, vcs
+from . import config as config_module, investigator, logging, planner, proposer, tnr, types, vcs
 
 
 @dataclass
@@ -45,15 +45,46 @@ def run_controller(
     """Run the investigation → planning → execution loop."""
 
     cfg = config or config_module.Config.default()
+
+    # Set up logging
+    logger = logging.RunLogger(cfg.logging.dir, ctx.instance_id)
+
     candidates = investigator.recall_candidates(ctx)
     candidates = investigator.probe(ctx, candidates)
     understanding = planner.synthesize(candidates)
     plan = planner.plan(understanding)[: cfg.search.max_steps]
 
+    # Log the understanding and plan
+    logger.log_json("understanding", {
+        "summary": understanding.summary,
+        "invariants": understanding.invariants,
+        "dependencies": understanding.dependencies,
+    })
+    logger.log_json("plan", [
+        {
+            "id": step.id,
+            "intent": step.intent,
+            "target_spans": [
+                {
+                    "file": span.file,
+                    "start_line": span.start_line,
+                    "end_line": span.end_line,
+                    "node_type": span.node_type,
+                    "symbol": span.symbol,
+                    "score": span.score,
+                }
+                for span in step.target_spans
+            ],
+            "constraints": step.constraints,
+            "ideal_outcome": step.ideal_outcome,
+            "check": step.check,
+        }
+        for step in plan
+    ])
+
     transactions: List[tnr.TransactionResult] = []
     for step in plan:
         ctx_files = _load_context(ctx.repo_path, step, cfg.limits.slice_padding_lines)
-        step_committed = False
         for _attempt in range(max(1, cfg.search.retries_per_step)):
             proposals = proposer.propose(step, ctx_files, config=cfg)
             finalists = max(1, cfg.search.finalists)
@@ -68,16 +99,30 @@ def run_controller(
             )
             transactions.append(result)
             if result.committed:
-                step_committed = True
                 break
-        if step_committed:
-            break
+
+    # Log the transactions
+    logger.log_json("transactions", [
+        {
+            "step_id": txn.applied_diff.step_id if txn.applied_diff else None,
+            "committed": txn.committed,
+            "mu_pre": txn.mu_pre,
+            "mu_post": txn.mu_post,
+            "logs": txn.logs,
+        }
+        for txn in transactions
+    ])
 
     patch = vcs.final_patch(ctx.repo_path)
     if not patch and transactions:
         last = transactions[-1]
         if last.applied_diff is not None:
             patch = last.applied_diff.unified_diff
+
+    # Log the final patch
+    if patch:
+        logger.log_text("final_patch", patch)
+
     return ControllerResult(final_patch=patch, transactions=transactions, understanding=understanding, plan=plan)
 
 
