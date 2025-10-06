@@ -145,11 +145,19 @@ def final_patch(repo_path: str) -> str:
     proc = _run_git(repo_path, "diff", "HEAD")
     return proc.stdout
 
+def diff_between(repo_path: str, base: str, head: str = "HEAD") -> str:
+    """Return the unified diff from base..head (committed changes).
+
+    This captures the cumulative effect across multiple commits, which is
+    necessary when each transaction creates its own commit.
+    """
+    proc = _run_git(repo_path, "diff", f"{base}..{head}")
+    return proc.stdout
+
 
 def clean(repo_path: str) -> None:
     """Discard uncommitted changes."""
 
     _run_git(repo_path, "reset", "--hard")
     _run_git(repo_path, "clean", "-fd")
-
 

@@ -31,6 +31,25 @@ class AstIndex:
         end = min(end_line + padding, len(lines))
         return "".join(lines[start:end])
 
+    # Public helpers for localization
+    def iter_symbol_spans(self) -> Iterable[types.AstSpan]:
+        """Yield all symbol spans indexed in the repository."""
+        for spans in self._symbols.values():
+            for span in spans:
+                yield span
+
+    def spans_in_file(self, file: str) -> List[types.AstSpan]:
+        """Return all symbol spans that belong to a given relative file path."""
+        return [s for s in self.iter_symbol_spans() if s.file == file]
+
+    def find_spans_covering(self, file: str, line: int) -> List[types.AstSpan]:
+        """Find symbol spans in `file` that enclose `line` (1-based)."""
+        return [
+            s
+            for s in self.spans_in_file(file)
+            if s.start_line <= line <= s.end_line
+        ]
+
 
 class _CallVisitor(ast.NodeVisitor):
     def __init__(self, file: str, calls: Dict[str, List[types.AstSpan]]):
@@ -106,5 +125,4 @@ def build_index(repo_path: Path | str) -> AstIndex:
         visitor.visit(tree)
 
     return AstIndex(root=root, _symbols=symbol_map, _calls=call_map, _file_cache=file_cache)
-
 

@@ -8,6 +8,33 @@ from pathlib import Path
 from typing import Iterable
 
 from . import config as config_module, controller, types
+from . import llm
+
+def _maybe_set_openai_client(cfg: config_module.Config) -> None:
+    """Optionally configure an OpenAI client from environment.
+
+    This is gated by environment variable CIP_USE_OPENAI=1 to avoid
+    introducing a hard dependency or affecting tests. If enabled, reads
+    OPENAI_API_KEY (and optional OPENAI_BASE_URL/OPENAI_MODEL) and sets the
+    llm client accordingly. Default model is "gpt-5" unless overridden.
+    """
+    import os
+
+    def _truthy(val: str | None) -> bool:
+        return (val or "").strip().lower() in {"1", "true", "yes", "on", "enable", "enabled"}
+
+    # Only enable via explicit env to avoid affecting tests/CI unexpectedly.
+    use_openai = _truthy(os.environ.get("CIP_USE_OPENAI"))
+    if not use_openai:
+        return
+    try:
+        from .llm_openai import make_client_from_env
+        # Environment OPENAI_MODEL should override config to ease runtime switching.
+        model = os.environ.get("OPENAI_MODEL") or (cfg.model.name or "gpt-5")
+        client = make_client_from_env(model_name=model)
+        llm.set_client(client)
+    except Exception as exc:  # pragma: no cover - runtime integration
+        raise RuntimeError(f"Failed to configure OpenAI client: {exc}")
 
 
 def _parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
@@ -36,11 +63,10 @@ def main(argv: Iterable[str] | None = None) -> None:
         metadata=task_data.get("metadata", {}),
     )
     cfg = config_module.Config.load(ns.config)
+    _maybe_set_openai_client(cfg)
     result = controller.run_controller(ctx, config=cfg)
     Path(ns.out).write_text(result.final_patch)
 
 
 if __name__ == "__main__":  # pragma: no cover
     main()
-
-

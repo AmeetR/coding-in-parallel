@@ -46,7 +46,7 @@ def test_run_controller_applies_committed_diff(monkeypatch: pytest.MonkeyPatch, 
     )
     diff = types.DiffProposal(
         step_id="step-1",
-        unified_diff="""diff --git a/mod.py b/mod.py\n@@\n-def add(x, y):\n-    return x - y\n+def add(x, y):\n+    return x + y\n""",
+        unified_diff="""diff --git a/mod.py b/mod.py\n@@ -1,2 +1,2 @@\n-def add(x, y):\n-    return x - y\n+def add(x, y):\n+    return x + y\n""",
         rationale="fix",
     )
 
@@ -123,6 +123,8 @@ def test_run_controller_processes_all_steps(monkeypatch: pytest.MonkeyPatch, rep
     monkeypatch.setattr(investigator, "probe", lambda ctx, cands: cands)
     monkeypatch.setattr(planner, "synthesize", lambda cands: types.Understanding("Fix add", [], []))
     monkeypatch.setattr(planner, "plan", lambda understanding: [step1, step2])
+    # Avoid LLM dependency by stubbing proposer
+    monkeypatch.setattr(proposer, "propose", lambda step, ctx_files, config: [diff1] if step.id == "step-1" else [diff2])
 
     call_count = 0
     def fake_txn(context, plan_step, proposals, *, config):
@@ -188,7 +190,7 @@ def test_run_controller_with_logging(monkeypatch: pytest.MonkeyPatch, repo: Path
     )
     diff = types.DiffProposal(
         step_id="step-1",
-        unified_diff="""diff --git a/mod.py b/mod.py\n@@\n-def add(x, y):\n-    return x - y\n+def add(x, y):\n+    return x + y\n""",
+        unified_diff="""diff --git a/mod.py b/mod.py\n@@ -1,2 +1,2 @@\n-def add(x, y):\n-    return x - y\n+def add(x, y):\n+    return x + y\n""",
         rationale="fix",
     )
 
@@ -226,8 +228,8 @@ def test_run_controller_with_logging(monkeypatch: pytest.MonkeyPatch, repo: Path
 
     # Create a logger instance
     logger = logging.RunLogger(str(tmp_path / "test_run"))
-    cfg = config_module.Config.default()
-    cfg.logging.dir = str(tmp_path / "test_runs")
+    # Build config with logging dir set (frozen dataclass)
+    cfg = config_module.Config.from_dict({"logging": {"dir": str(tmp_path / "test_runs")}})
 
     # Run controller with logging config
     result = controller.run_controller(ctx, config=cfg)
@@ -241,3 +243,58 @@ def test_run_controller_with_logging(monkeypatch: pytest.MonkeyPatch, repo: Path
     assert any('transactions' in name for name in logged_names)
 
 
+def test_controller_builds_targeted_test_cmd(monkeypatch: pytest.MonkeyPatch, repo: Path):
+    """Controller should derive a -k expression from failing tests when appropriate."""
+    from coding_in_parallel import gates
+
+    ctx = types.TaskContext(
+        repo_path=str(repo),
+        failing_tests=[
+            "pkg/tests/test_calc.py::test_add",
+            "pkg/tests/test_calc.py::test_sub",
+        ],
+        test_cmd="pytest -q",  # broad command; should be specialized
+        targeted_expr=None,
+        instance_id="example-2",
+        metadata={},
+    )
+
+    candidate = types.Candidate(
+        id="cand-1",
+        hypothesis="add subtracts",
+        spans=[types.AstSpan(file="mod.py", start_line=1, end_line=2, node_type="FunctionDef")],
+        evidence={},
+    )
+    step = types.PlanStep(
+        id="step-1",
+        intent="Fix add",
+        target_spans=candidate.spans,
+        constraints=[],
+        ideal_outcome="add sums",
+        check="tests",
+    )
+    diff = types.DiffProposal(
+        step_id="step-1",
+        unified_diff="""diff --git a/mod.py b/mod.py\n@@ -1,2 +1,2 @@\n-def add(x, y):\n-    return x - y\n+def add(x, y):\n+    return x + y\n""",
+        rationale="fix",
+    )
+
+    monkeypatch.setattr(investigator, "recall_candidates", lambda ctx: [candidate])
+    monkeypatch.setattr(investigator, "probe", lambda ctx, cands: cands)
+    monkeypatch.setattr(planner, "synthesize", lambda cands: types.Understanding("Fix add", [], []))
+    monkeypatch.setattr(planner, "plan", lambda understanding: [step])
+    monkeypatch.setattr(proposer, "propose", lambda step, ctx_files, config: [diff])
+
+    seen_cmds = []
+    def fake_run_targeted(cmd: str, repo_path: str):
+        seen_cmds.append(cmd)
+        return True, "ok"
+
+    monkeypatch.setattr(gates, "run_targeted_tests", fake_run_targeted)
+
+    cfg = config_module.Config.default()
+    result = controller.run_controller(ctx, config=cfg)
+    assert result.transactions[0].committed
+    # Must have passed a -k expression containing both test names
+    assert seen_cmds and "-k" in seen_cmds[0]
+    assert "test_add" in seen_cmds[0] and "test_sub" in seen_cmds[0]

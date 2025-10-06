@@ -54,3 +54,31 @@ def test_within_limits_rejects_lines_outside_span():
         )
 
 
+def test_api_guard_rejects_signature_changes():
+    diff = """diff --git a/mod.py b/mod.py
+@@ -1,2 +1,2 @@
+-def add(x, y):
+-    return x - y
++def add(x, y, z=0):
++    return x + y
+"""
+    span = types.AstSpan(file="mod.py", start_line=1, end_line=4, node_type="FunctionDef")
+    with pytest.raises(validate.ValidationError):
+        validate.ensure_within_limits(
+            diff,
+            allowed_files={"mod.py"},
+            max_loc=10,
+            max_files=1,
+            target_spans=[span],
+        )
+
+    # But allow when explicitly permitted
+    validate.ensure_within_limits(
+        diff,
+        allowed_files={"mod.py"},
+        max_loc=10,
+        max_files=1,
+        target_spans=[span],
+        allow_api_change=True,
+    )
+

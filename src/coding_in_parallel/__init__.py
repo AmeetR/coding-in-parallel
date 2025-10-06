@@ -11,6 +11,7 @@ from . import (
     main,
     planner,
     proposer,
+    localize,
     tnr,
     types,
     validate,
@@ -28,9 +29,9 @@ __all__ = [
     "main",
     "planner",
     "proposer",
+    "localize",
     "tnr",
     "types",
     "validate",
     "vcs",
 ]
-

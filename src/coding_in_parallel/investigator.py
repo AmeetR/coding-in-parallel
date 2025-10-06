@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Sequence
 
 from . import ast_index, llm, types
+from .probes import blackboard as bbmod
+from .probes import runner as probe_runner
+from .probes import sandbox as sbx
+from .probes import scheduler as sched
 
 _PROMPT_DIR = Path(__file__).resolve().parents[2] / "prompts"
 
@@ -89,4 +94,95 @@ def probe(ctx: types.TaskContext, candidates: Iterable[types.Candidate]) -> List
         enriched.append(candidate)
     return enriched
 
+
+# ---- Spec-aligned investigative loop (blackboard + scheduler) ----
+
+
+def _candidates_to_suspects(candidates: Sequence[types.Candidate], k: int = 7) -> List[types.Node]:
+    suspects: List[types.Node] = []
+    for cand in candidates:
+        for span in cand.spans:
+            suspicion = span.score if span.score is not None else 0.5
+            suspects.append(
+                types.Node(
+                    id=f"{cand.id}:{span.file}:{span.start_line}-{span.end_line}",
+                    span=span,
+                    kind=span.node_type.lower(),
+                    hop=0,
+                    in_stack=False,
+                    suspicion=float(suspicion),
+                )
+            )
+    # Keep top-k by suspicion
+    suspects.sort(key=lambda n: n.suspicion, reverse=True)
+    return suspects[:k]
+
+
+def _make_probe_patch(pcb: sched.PCB, node: types.Node) -> types.ProbePatch:
+    # Minimal, safe instrumentation: add a marker comment at top of target file
+    diff = (
+        f"diff --git a/{node.span.file} b/{node.span.file}\n"\
+        f"@@\n"\
+        f"+# cip_probe {pcb.id} for {node.id}\n"
+    )
+    return types.ProbePatch(
+        id=f"pp-{pcb.id}",
+        suspect_id=node.id,
+        diff=diff,
+        purpose="instrument",
+        loc_changed=1,
+        rationale="trace entry",
+    )
+
+
+def run_investigations(
+    ctx: types.TaskContext,
+    candidates: Sequence[types.Candidate],
+    *,
+    max_probes: int = 7,
+    quantum_ops: int = 10,
+    timeout_sec: int = 60,
+) -> types.Blackboard:
+    """Run investigative probes in sandboxes and return a blackboard snapshot.
+
+    This minimal implementation schedules up to max_probes single-action patches
+    and computes a naive info_gain from test outcomes.
+    """
+
+    store = bbmod.BlackboardStore()
+    suspects = _candidates_to_suspects(candidates)
+    store.publish_suspects(suspects)
+    schedr = sched.Scheduler()
+    node_by_id = {n.id: n for n in suspects}
+    # Seed PCBs
+    for i, n in enumerate(suspects):
+        schedr.add_pcb(sched.PCB(id=f"pcb-{i+1}", suspect_id=n.id, quantum_ops=quantum_ops, time_budget=timeout_sec))
+
+    probes_run = 0
+    while probes_run < max_probes:
+        pcb = schedr.next_pcb()
+        if pcb is None:
+            break
+        node = node_by_id.get(pcb.suspect_id)
+        if node is None:
+            break
+        patch = _make_probe_patch(pcb, node)
+        sb = sbx.create(ctx.repo_path)
+        try:
+            artifacts, gain = probe_runner.investigative_tx(sb, [patch], ctx.test_cmd, timeout_sec=timeout_sec)
+            # Update blackboard
+            store.publish_probe_patch(patch)
+            for art in artifacts:
+                store.publish_evidence({"probe_id": art.get("probe_id"), "result": art.get("result")})
+            schedr.record_gain(pcb.id, gain)
+            probes_run += 1
+            # Preemption policy: demote if low gain, boost otherwise
+            if gain <= 0.0:
+                schedr.preempt(pcb.id)
+            else:
+                schedr.boost(pcb.id)
+        finally:
+            sb.cleanup()
+
+    return store.snapshot()
 

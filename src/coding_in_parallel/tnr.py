@@ -67,6 +67,7 @@ def txn_patch(
                 max_files=config.limits.max_files_per_diff,
                 target_spans=step.target_spans,
                 padding_lines=config.limits.slice_padding_lines,
+                allow_api_change=("allow_api" in step.constraints),
             )
         except validate.ValidationError as exc:
             logs.append(f"validation failed: {exc}")
@@ -113,5 +114,4 @@ def txn_patch(
 
     vcs.revert(repo_path, head)
     return TransactionResult(False, None, mu_pre, mu_pre, logs=logs)
-
 

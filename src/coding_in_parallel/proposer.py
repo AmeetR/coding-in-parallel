@@ -40,12 +40,25 @@ def propose(
     context_lines = []
     for file, content in ctx_files.items():
         context_lines.append(f"FILE: {file}\n{content}")
+    # Build strict file whitelist and line windows for the prompt to encourage scoped edits
+    allowed_files = sorted({span.file for span in step.target_spans})
+    line_windows = [
+        {
+            "file": span.file,
+            "start": span.start_line,
+            "end": span.end_line,
+        }
+        for span in step.target_spans
+    ]
+
     payload = {
         "step": step.intent,
         "span_summary": _format_span_summary(step),
         "context": "\n\n".join(context_lines) or "(no context available)",
         "k": config.search.diffs_per_step,
         "max_loc": config.limits.max_loc_changes,
+        "file_whitelist": allowed_files,
+        "line_windows": line_windows,
     }
     formatted_prompt = prompt.format(**payload)
     response = llm.complete(formatted_prompt)
@@ -70,5 +83,4 @@ def propose(
             )
         )
     return proposals
-
 

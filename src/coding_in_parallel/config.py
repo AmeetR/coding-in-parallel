@@ -25,6 +25,8 @@ class SearchConfig:
     diffs_per_step: int = 3
     finalists: int = 2
     retries_per_step: int = 1
+    investigations_enabled: bool = False
+    use_landmarks: bool = False
 
 
 @dataclass(frozen=True)
@@ -50,6 +52,7 @@ class GateConfig:
 @dataclass(frozen=True)
 class LoggingConfig:
     dir: str = ".agent_runs"
+    stream: bool = False
 
 
 @dataclass(frozen=True)
@@ -111,4 +114,3 @@ __all__ = [
     "SearchConfig",
     "TnrConfig",
 ]
-
