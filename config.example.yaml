@@ -1,0 +1,41 @@
+# Example configuration for coding-in-parallel
+
+model:
+  provider: "openai"
+  name: "gpt-5"
+
+search:
+  max_steps: 4
+  diffs_per_step: 6
+  finalists: 2
+  retries_per_step: 1
+  investigations_enabled: true
+  use_landmarks: true
+  use_langgraph: true
+
+limits:
+  max_loc_changes: 12
+  max_files_per_diff: 2
+  slice_padding_lines: 80
+
+tnr:
+  actions_per_txn: 3
+  require_mu_nonworsening: true
+
+gates:
+  static: true
+  targeted_tests: true
+  smoke: false
+
+runtime:
+  # Use "docker" for SWE-bench patch generation so tests/probes run in-container.
+  kind: "docker"  # "local" | "docker"
+  image: "swebench/swe-bench:latest"
+  workdir: "/repo"
+  env:
+    PYTHONUNBUFFERED: "1"
+  user: "host"
+
+logging:
+  dir: ".agent_runs"
+  stream: false

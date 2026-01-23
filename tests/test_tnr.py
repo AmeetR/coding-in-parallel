@@ -48,8 +48,8 @@ def test_txn_patch_commits_when_checks_pass(monkeypatch: pytest.MonkeyPatch, git
     )
     diff = """diff --git a/mod.py b/mod.py\n@@ -1,2 +1,2 @@\n-def add(x, y):\n-    return x - y\n+def add(x, y):\n+    return x + y\n"""
 
-    monkeypatch.setattr(gates, "run_static_checks", lambda repo: (True, "ok"))
-    monkeypatch.setattr(gates, "run_targeted_tests", lambda cmd, repo: (True, "tests pass"))
+    monkeypatch.setattr(gates, "run_static_checks", lambda repo, runtime=None: (True, "ok"))
+    monkeypatch.setattr(gates, "run_targeted_tests", lambda cmd, repo, runtime=None: (True, "tests pass"))
 
     result = tnr.txn_patch(
         ctx,
@@ -77,15 +77,15 @@ def test_txn_patch_rolls_back_on_failure(monkeypatch: pytest.MonkeyPatch, git_re
     )
     bad_diff = """diff --git a/mod.py b/mod.py\n@@ -1,2 +1,2 @@\n-def add(x, y):\n-    return x - y\n+def add(x, y)::\n+    return x + y\n"""
 
-    monkeypatch.setattr(gates, "run_static_checks", lambda repo: (False, "syntax error"))
-    monkeypatch.setattr(gates, "run_targeted_tests", lambda cmd, repo: (True, "tests pass"))
+    monkeypatch.setattr(gates, "run_static_checks", lambda repo, runtime=None: (False, "syntax error"))
+    monkeypatch.setattr(gates, "run_targeted_tests", lambda cmd, repo, runtime=None: (True, "tests pass"))
 
     with pytest.raises(validate.ValidationError):
         validate.require_unified_diff(bad_diff)
 
     # Provide a valid diff but fail gates.
     diff = """diff --git a/mod.py b/mod.py\n@@ -1,2 +1,2 @@\n-def add(x, y):\n-    return x - y\n+def add(x, y):\n+    return x + y\n"""
-    monkeypatch.setattr(gates, "run_static_checks", lambda repo: (False, "syntax error"))
+    monkeypatch.setattr(gates, "run_static_checks", lambda repo, runtime=None: (False, "syntax error"))
 
     result = tnr.txn_patch(
         ctx,
@@ -113,7 +113,7 @@ def test_txn_patch_rolls_back_when_mu_worsens(monkeypatch: pytest.MonkeyPatch, g
     )
     diff = """diff --git a/mod.py b/mod.py\n@@ -1,2 +1,5 @@\n def add(x, y):\n-    return x - y\n+    return x - y\n+\n+def helper():\n+    return 41\n"""
 
-    monkeypatch.setattr(gates, "run_static_checks", lambda repo: (True, "ok"))
+    monkeypatch.setattr(gates, "run_static_checks", lambda repo, runtime=None: (True, "ok"))
 
     result = tnr.txn_patch(
         ctx,
@@ -124,5 +124,3 @@ def test_txn_patch_rolls_back_when_mu_worsens(monkeypatch: pytest.MonkeyPatch, g
     assert not result.committed
     assert any("mu worsened" in log for log in result.logs)
     assert "helper" not in (git_repo / "mod.py").read_text()
-
-

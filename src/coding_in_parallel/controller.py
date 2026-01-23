@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List
 
-from . import combine, config as config_module, investigator, logging, planner, proposer, tnr, types, vcs
+from . import combine, config as config_module, investigator, localize, logging, planner, proposer, tnr, types, vcs
 
 
 @dataclass
@@ -58,6 +58,44 @@ def _derive_test_cmd(ctx: types.TaskContext, cfg: config_module.Config) -> str:
     return ctx.test_cmd
 
 
+def _attach_hammock_allowlists(
+    repo_path: str,
+    plan: List[types.PlanStep],
+) -> List[types.PlanStep]:
+    """Attach Stage‑A hammock allowlists to plan steps."""
+    hammocks = localize.extract_hammocks_stage_a(Path(repo_path))
+    updated: List[types.PlanStep] = []
+    for step in plan:
+        allowlists: list[tuple[str, int, int]] = []
+        for span in step.target_spans:
+            for block in hammocks.get(span.file, []):
+                if block.start_line <= span.start_line <= block.end_line:
+                    allowlists.append((block.file, block.start_line, block.end_line))
+        # Fallback to span window if no hammocks matched
+        if not allowlists:
+            for span in step.target_spans:
+                allowlists.append((span.file, span.start_line, span.end_line))
+        # De‑dup
+        unique = []
+        seen = set()
+        for item in allowlists:
+            if item not in seen:
+                unique.append(item)
+                seen.add(item)
+        updated.append(
+            types.PlanStep(
+                id=step.id,
+                intent=step.intent,
+                target_spans=step.target_spans,
+                constraints=step.constraints,
+                ideal_outcome=step.ideal_outcome,
+                check=step.check,
+                allowlists=unique,
+            )
+        )
+    return updated
+
+
 def run_controller(
     ctx: types.TaskContext,
     *,
@@ -81,7 +119,8 @@ def run_controller(
     baseline = vcs.checkpoint(ctx.repo_path)
     logger.log_event("vcs.checkpoint", baseline=baseline)
 
-    candidates = investigator.recall_candidates(ctx)
+    use_langgraph = getattr(cfg.search, "use_langgraph", False)
+    candidates = investigator.recall_candidates_grounded(ctx) if use_langgraph else investigator.recall_candidates(ctx)
     logger.log_json("candidates", [
         {
             "id": c.id,
@@ -195,6 +234,9 @@ def run_controller(
         plan = planner.plan(understanding)[: cfg.search.max_steps]
         logger.log_event("planner.synthesize.done", steps=len(plan))
 
+    # Attach hammock allowlists for tighter edit windows
+    plan = _attach_hammock_allowlists(ctx.repo_path, plan)
+
     # Log the understanding and plan
     logger.log_json("understanding", {
         "summary": understanding.summary,
@@ -219,6 +261,7 @@ def run_controller(
             "constraints": step.constraints,
             "ideal_outcome": step.ideal_outcome,
             "check": step.check,
+            "allowlists": step.allowlists,
         }
         for step in plan
     ])

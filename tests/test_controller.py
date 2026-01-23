@@ -286,7 +286,7 @@ def test_controller_builds_targeted_test_cmd(monkeypatch: pytest.MonkeyPatch, re
     monkeypatch.setattr(proposer, "propose", lambda step, ctx_files, config: [diff])
 
     seen_cmds = []
-    def fake_run_targeted(cmd: str, repo_path: str):
+    def fake_run_targeted(cmd: str, repo_path: str, runtime=None):
         seen_cmds.append(cmd)
         return True, "ok"
 

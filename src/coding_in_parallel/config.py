@@ -27,6 +27,7 @@ class SearchConfig:
     retries_per_step: int = 1
     investigations_enabled: bool = False
     use_landmarks: bool = False
+    use_langgraph: bool = False
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,17 @@ class GateConfig:
 
 
 @dataclass(frozen=True)
+class RuntimeConfig:
+    """Execution runtime configuration (local or docker)."""
+
+    kind: str = "local"
+    image: str | None = None
+    workdir: str = "/repo"
+    env: Dict[str, str] = field(default_factory=dict)
+    user: str | None = "host"
+
+
+@dataclass(frozen=True)
 class LoggingConfig:
     dir: str = ".agent_runs"
     stream: bool = False
@@ -64,6 +76,7 @@ class Config:
     limits: LimitsConfig = field(default_factory=LimitsConfig)
     tnr: TnrConfig = field(default_factory=TnrConfig)
     gates: GateConfig = field(default_factory=GateConfig)
+    runtime: RuntimeConfig = field(default_factory=RuntimeConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
 
     @classmethod
@@ -76,6 +89,9 @@ class Config:
         limits = LimitsConfig(**_filter_kwargs(data.get("limits", {}), allowed=set(LimitsConfig.__annotations__.keys())))
         tnr_cfg = TnrConfig(**_filter_kwargs(data.get("tnr", {}), allowed=set(TnrConfig.__annotations__.keys())))
         gates = GateConfig(**_filter_kwargs(data.get("gates", {}), allowed=set(GateConfig.__annotations__.keys())))
+        runtime_cfg = RuntimeConfig(
+            **_filter_kwargs(data.get("runtime", {}), allowed=set(RuntimeConfig.__annotations__.keys()))
+        )
         logging_cfg = LoggingConfig(
             **_filter_kwargs(data.get("logging", {}), allowed=set(LoggingConfig.__annotations__.keys()))
         )
@@ -86,6 +102,7 @@ class Config:
             limits=limits,
             tnr=tnr_cfg,
             gates=gates,
+            runtime=runtime_cfg,
             logging=logging_cfg,
         )
 
@@ -111,6 +128,7 @@ __all__ = [
     "LimitsConfig",
     "LoggingConfig",
     "ModelConfig",
+    "RuntimeConfig",
     "SearchConfig",
     "TnrConfig",
 ]

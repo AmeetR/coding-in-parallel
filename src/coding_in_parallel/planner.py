@@ -104,7 +104,11 @@ def plan_landmarks(failure: types.FailurePattern, *, max_landmarks: int = 3) -> 
                 "summary": failure.summary,
                 "primary_location": asdict(failure.primary_location),
                 "alternatives": [
-                    {"span": asdict(alt["span"]), "why": alt.get("why", "")} for alt in failure.alternatives
+                    {
+                        "span": (alt["span"] if isinstance(alt.get("span"), dict) else asdict(alt["span"])),
+                        "why": alt.get("why", ""),
+                    }
+                    for alt in failure.alternatives
                 ],
                 "invariants": failure.invariants,
                 "confidence": failure.confidence,

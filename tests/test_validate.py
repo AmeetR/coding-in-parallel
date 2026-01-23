@@ -82,3 +82,30 @@ def test_api_guard_rejects_signature_changes():
         allow_api_change=True,
     )
 
+
+def test_extra_allowlists_expand_edit_window():
+    diff = """diff --git a/mod.py b/mod.py
+@@ -50,0 +50,2 @@
++print('out of range')
+"""
+    span = types.AstSpan(file="mod.py", start_line=1, end_line=10, node_type="Module")
+    # Without allowlist, should fail
+    with pytest.raises(validate.ValidationError):
+        validate.ensure_within_limits(
+            diff,
+            allowed_files={"mod.py"},
+            max_loc=5,
+            max_files=1,
+            target_spans=[span],
+            padding_lines=0,
+        )
+    # With allowlist covering line 50, should pass
+    validate.ensure_within_limits(
+        diff,
+        allowed_files={"mod.py"},
+        max_loc=5,
+        max_files=1,
+        target_spans=[span],
+        padding_lines=0,
+        extra_allowlists=[("mod.py", 45, 55)],
+    )

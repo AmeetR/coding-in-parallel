@@ -1,4 +1,5 @@
 import json
+import shlex
 from pathlib import Path
 
 import pytest
@@ -87,3 +88,35 @@ def test_probe_appends_notes(monkeypatch: pytest.MonkeyPatch, repo_with_bug: Pat
     assert "probe" in enriched[0].evidence
     assert "Function subtracts" in enriched[0].evidence["probe"]["notes"]
 
+
+def test_probe_test_command_prefers_failing_tests(repo_with_bug: Path):
+    ctx = _make_ctx(repo_with_bug)
+    cmd = investigator._probe_test_command(ctx)
+    parts = shlex.split(cmd)
+    assert parts[0] == "pytest"
+    assert "-q" in parts
+    assert "--maxfail=1" in parts
+    assert "tests/test_mod.py::test_add" in parts
+
+
+def test_probe_test_command_uses_targeted_expr(repo_with_bug: Path):
+    ctx = types.TaskContext(
+        repo_path=str(repo_with_bug),
+        failing_tests=[],
+        test_cmd="pytest -q",
+        targeted_expr="add or sub",
+        instance_id="example-1",
+        metadata={},
+    )
+    cmd = investigator._probe_test_command(ctx)
+    parts = shlex.split(cmd)
+    assert parts[0] == "pytest"
+    assert "-k" in parts
+    assert "--maxfail=1" in parts
+
+
+def test_lightweight_pytest_cmd_adds_maxfail():
+    cmd = investigator._lightweight_pytest_cmd("pytest -k add")
+    parts = shlex.split(cmd)
+    assert "pytest" in parts[0]
+    assert "--maxfail=1" in parts

@@ -6,6 +6,9 @@ search:
   diffs_per_step: 6
   finalists: 2
   retries_per_step: 1
+  investigations_enabled: true
+  use_landmarks: true
+  use_langgraph: true
 limits:
   max_loc_changes: 12
   max_files_per_diff: 2
@@ -17,5 +20,11 @@ gates:
   static: true
   targeted_tests: true
   smoke: false
+runtime:
+  kind: "local"
+  image:
+  workdir: "/repo"
+  env: {}
+  user: "host"
 logging:
   dir: ".agent_runs"

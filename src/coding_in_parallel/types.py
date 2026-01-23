@@ -48,6 +48,7 @@ class PlanStep:
     constraints: List[str]
     ideal_outcome: str
     check: str
+    allowlists: List[Tuple[str, int, int]] = field(default_factory=list)
 
 
 @dataclass
@@ -157,4 +158,4 @@ class TaskContext:
     targeted_expr: Optional[str]
     instance_id: str
     metadata: Dict[str, Any]
-
+    runtime: Any | None = None

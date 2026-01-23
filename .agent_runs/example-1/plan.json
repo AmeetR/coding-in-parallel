@@ -1,0 +1,26 @@
+[
+  {
+    "allowlists": [
+      [
+        "mod.py",
+        1,
+        2
+      ]
+    ],
+    "check": "tests",
+    "constraints": [],
+    "id": "step-1",
+    "ideal_outcome": "add returns sum",
+    "intent": "Fix add",
+    "target_spans": [
+      {
+        "end_line": 2,
+        "file": "mod.py",
+        "node_type": "FunctionDef",
+        "score": null,
+        "start_line": 1,
+        "symbol": null
+      }
+    ]
+  }
+]

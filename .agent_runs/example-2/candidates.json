@@ -1,0 +1,16 @@
+[
+  {
+    "hypothesis": "add subtracts",
+    "id": "cand-1",
+    "spans": [
+      {
+        "end_line": 2,
+        "file": "mod.py",
+        "node_type": "FunctionDef",
+        "score": null,
+        "start_line": 1,
+        "symbol": null
+      }
+    ]
+  }
+]

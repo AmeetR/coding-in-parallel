@@ -8,14 +8,26 @@ import sys
 from pathlib import Path
 from typing import Tuple
 
+from .runtime import CommandResult, Runtime
 
-def run_static_checks(repo_path: str) -> Tuple[bool, str]:
+
+def _merge_output(result: CommandResult) -> str:
+    return (result.stdout or "") + (result.stderr or "")
+
+
+def run_static_checks(repo_path: str, runtime: Runtime | None = None) -> Tuple[bool, str]:
     """Run lightweight static checks using ``py_compile``."""
 
     root = Path(repo_path)
     py_files = [str(path) for path in root.rglob("*.py") if path.is_file()]
     if not py_files:
         return True, "no python files"
+    if runtime is not None:
+        # Run inside the configured runtime using paths relative to repo root.
+        rel_paths = [str(Path(path).relative_to(root)) for path in py_files]
+        cmd = ["python", "-m", "py_compile", *rel_paths]
+        result = runtime.exec(cmd)
+        return result.ok, _merge_output(result)
     cmd = [sys.executable, "-m", "py_compile", *py_files]
     proc = subprocess.run(cmd, cwd=repo_path, capture_output=True, text=True)
     success = proc.returncode == 0
@@ -23,11 +35,18 @@ def run_static_checks(repo_path: str) -> Tuple[bool, str]:
     return success, output
 
 
-def run_targeted_tests(test_cmd: str, repo_path: str) -> Tuple[bool, str]:
+def run_targeted_tests(
+    test_cmd: str,
+    repo_path: str,
+    runtime: Runtime | None = None,
+) -> Tuple[bool, str]:
     """Run the provided targeted test command."""
 
     if not test_cmd:
         return True, "no tests configured"
+    if runtime is not None:
+        result = runtime.exec(test_cmd)
+        return result.ok, _merge_output(result)
     proc = subprocess.run(
         shlex.split(test_cmd),
         cwd=repo_path,
@@ -37,5 +56,4 @@ def run_targeted_tests(test_cmd: str, repo_path: str) -> Tuple[bool, str]:
     success = proc.returncode == 0
     output = proc.stdout + proc.stderr
     return success, output
-
 

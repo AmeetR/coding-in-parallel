@@ -1,0 +1,19 @@
+You are generating repair landmarks from a failure pattern.
+
+FAILURE_PATTERN_JSON:
+{failure_pattern}
+
+MAX_LANDMARKS: {max_landmarks}
+
+Return a JSON array of up to MAX_LANDMARKS objects with fields:
+- id: string
+- intent: string
+- target_spans: array of {file, start_line, end_line, node_type, symbol?}
+- constraints: array of strings
+- landmark_test: string
+- rollback_on: array of strings
+- risk: "low" | "medium" | "high" | "unknown"
+- confidence: number 0.0-1.0
+- try_after: string | null
+
+Output JSON ONLY.

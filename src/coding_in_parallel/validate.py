@@ -40,12 +40,23 @@ def _touched_files(diff: str) -> Set[str]:
     return {b for _a, b in matches}
 
 
-def _span_map(target_spans: Iterable[types.AstSpan], padding: int) -> dict[str, list[tuple[int, int]]]:
+def _span_map(
+    target_spans: Iterable[types.AstSpan],
+    padding: int,
+    extra_allowlists: Iterable[tuple[str, int, int]] | None = None,
+) -> dict[str, list[tuple[int, int]]]:
     spans: dict[str, list[tuple[int, int]]] = {}
     for span in target_spans:
         start = max(1, span.start_line - padding)
         end = max(start, span.end_line + padding)
         spans.setdefault(span.file, []).append((start, end))
+    if extra_allowlists:
+        for file, start, end in extra_allowlists:
+            if start <= 0 or end <= 0:
+                continue
+            if end < start:
+                start, end = end, start
+            spans.setdefault(file, []).append((start, end))
     return spans
 
 
@@ -66,6 +77,7 @@ def ensure_within_limits(
     target_spans: Iterable[types.AstSpan],
     padding_lines: int = 0,
     allow_api_change: bool = False,
+    extra_allowlists: Iterable[tuple[str, int, int]] | None = None,
 ) -> None:
     """Check diff obeys configured limits."""
 
@@ -73,6 +85,8 @@ def ensure_within_limits(
     files = _touched_files(diff)
     if not files:
         raise ValidationError("Diff must touch at least one file header.")
+    if extra_allowlists:
+        allowed_files = set(allowed_files) | {file for file, _s, _e in extra_allowlists}
     if len(files) > max_files:
         raise ValidationError("Diff touches too many files.")
     if not files.issubset(allowed_files):
@@ -81,10 +95,16 @@ def ensure_within_limits(
     if loc > max_loc:
         raise ValidationError("Diff changes too many lines.")
     span_files = {span.file for span in target_spans}
+    if extra_allowlists:
+        span_files |= {file for file, _s, _e in extra_allowlists}
     if not files.intersection(span_files):
         raise ValidationError("Diff does not touch any target span files.")
 
-    span_ranges = _span_map(target_spans, padding_lines)
+    if extra_allowlists:
+        # Hammock allowlists are intended to tighten scope.
+        span_ranges = _span_map([], 0, extra_allowlists=extra_allowlists)
+    else:
+        span_ranges = _span_map(target_spans, padding_lines, extra_allowlists=None)
     current_file: str | None = None
     old_line = new_line = None
     # Track signature lines within a hunk to detect true signature edits

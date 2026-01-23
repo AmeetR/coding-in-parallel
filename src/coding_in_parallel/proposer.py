@@ -50,6 +50,9 @@ def propose(
         }
         for span in step.target_spans
     ]
+    # Include hammock allowlists (if present) to encourage scoped edits.
+    for file, start, end in step.allowlists:
+        line_windows.append({"file": file, "start": start, "end": end})
 
     payload = {
         "step": step.intent,
@@ -83,4 +86,3 @@ def propose(
             )
         )
     return proposals
-

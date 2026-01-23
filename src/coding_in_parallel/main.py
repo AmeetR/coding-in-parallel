@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Iterable
 
 from . import config as config_module, controller, types
+from . import runtime as runtime_module
 from . import llm
 
 def _maybe_set_openai_client(cfg: config_module.Config) -> None:
@@ -23,8 +25,8 @@ def _maybe_set_openai_client(cfg: config_module.Config) -> None:
     def _truthy(val: str | None) -> bool:
         return (val or "").strip().lower() in {"1", "true", "yes", "on", "enable", "enabled"}
 
-    # Only enable via explicit env to avoid affecting tests/CI unexpectedly.
-    use_openai = _truthy(os.environ.get("CIP_USE_OPENAI"))
+    # Only enable via explicit env or config to avoid affecting tests/CI unexpectedly.
+    use_openai = _truthy(os.environ.get("CIP_USE_OPENAI")) or (cfg.model.provider == "openai")
     if not use_openai:
         return
     try:
@@ -44,6 +46,16 @@ def _parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out", required=True, help="Where to write the final patch")
     parser.add_argument("--test-cmd", required=True, help="Command used for targeted tests")
     parser.add_argument(
+        "--predictions-out",
+        default=None,
+        help="Optional: write SWE-bench predictions JSONL to this path",
+    )
+    parser.add_argument(
+        "--model-name",
+        default=None,
+        help="Model name to include in predictions JSONL (defaults to OPENAI_MODEL or config.model.name)",
+    )
+    parser.add_argument(
         "--config",
         default=None,
         help="Path to YAML configuration file (defaults to ./config.yaml if omitted)",
@@ -54,6 +66,9 @@ def _parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
 def main(argv: Iterable[str] | None = None) -> None:
     ns = _parse_args(argv)
     task_data = json.loads(Path(ns.task).read_text())
+    cfg = config_module.Config.load(ns.config)
+    image_override = task_data.get("docker_image") or task_data.get("metadata", {}).get("docker_image")
+    runtime = runtime_module.build_runtime(cfg.runtime, ns.repo, image_override=image_override)
     ctx = types.TaskContext(
         repo_path=ns.repo,
         failing_tests=list(task_data.get("failing_tests", [])),
@@ -61,11 +76,31 @@ def main(argv: Iterable[str] | None = None) -> None:
         targeted_expr=task_data.get("targeted_expr"),
         instance_id=task_data.get("instance_id", "unknown"),
         metadata=task_data.get("metadata", {}),
+        runtime=runtime,
     )
-    cfg = config_module.Config.load(ns.config)
     _maybe_set_openai_client(cfg)
-    result = controller.run_controller(ctx, config=cfg)
+    try:
+        result = controller.run_controller(ctx, config=cfg)
+    finally:
+        if runtime is not None:
+            runtime.close()
     Path(ns.out).write_text(result.final_patch)
+
+    if ns.predictions_out:
+        model_name = ns.model_name or os.environ.get("OPENAI_MODEL") or (cfg.model.name or "coding-in-parallel")
+        record = {
+            "instance_id": ctx.instance_id,
+            "model_name_or_path": model_name,
+            "model_patch": result.final_patch,
+        }
+        _write_predictions_jsonl(Path(ns.predictions_out), record)
+
+
+def _write_predictions_jsonl(path: Path, record: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    line = json.dumps(record, ensure_ascii=False)
+    # Always write a single-line JSONL file for SWE-bench
+    path.write_text(line + "\n")
 
 
 if __name__ == "__main__":  # pragma: no cover

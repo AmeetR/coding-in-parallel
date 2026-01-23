@@ -45,10 +45,16 @@ def txn_patch(
     repo_path = ctx.repo_path
     head = vcs.checkpoint(repo_path)
     allowed_files = {span.file for span in step.target_spans}
+    if step.allowlists:
+        allowed_files.update(file for file, _s, _e in step.allowlists)
     logs: List[str] = []
 
     if config.gates.targeted_tests:
-        baseline_ok, baseline_output = gates.run_targeted_tests(ctx.test_cmd, repo_path)
+        baseline_ok, baseline_output = gates.run_targeted_tests(
+            ctx.test_cmd,
+            repo_path,
+            runtime=ctx.runtime,
+        )
         if not baseline_ok:
             logs.append(f"baseline targeted tests failing: {baseline_output.strip()}")
         mu_pre = 0 if baseline_ok else 1
@@ -68,6 +74,7 @@ def txn_patch(
                 target_spans=step.target_spans,
                 padding_lines=config.limits.slice_padding_lines,
                 allow_api_change=("allow_api" in step.constraints),
+                extra_allowlists=step.allowlists,
             )
         except validate.ValidationError as exc:
             logs.append(f"validation failed: {exc}")
@@ -89,14 +96,18 @@ def txn_patch(
                 continue
 
         if config.gates.static:
-            ok, output = gates.run_static_checks(repo_path)
+            ok, output = gates.run_static_checks(repo_path, runtime=ctx.runtime)
             if not ok:
                 logs.append(f"static checks failed: {output.strip()}")
                 vcs.revert(repo_path, head)
                 continue
 
         if config.gates.targeted_tests:
-            ok, output = gates.run_targeted_tests(ctx.test_cmd, repo_path)
+            ok, output = gates.run_targeted_tests(
+                ctx.test_cmd,
+                repo_path,
+                runtime=ctx.runtime,
+            )
             mu_post = 0 if ok else 1
             if not ok:
                 logs.append(f"targeted tests failed: {output.strip()}")
@@ -114,4 +125,3 @@ def txn_patch(
 
     vcs.revert(repo_path, head)
     return TransactionResult(False, None, mu_pre, mu_pre, logs=logs)
-
