@@ -580,3 +580,139 @@
 {"ts":1769201462.9207191,"ts_iso":"2026-01-23T20:51:02.920Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
 {"ts":1769201462.934678,"ts_iso":"2026-01-23T20:51:02.934Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
 {"ts":1769201462.9347699,"ts_iso":"2026-01-23T20:51:02.934Z","kind":"controller.finish","data":{"final_patch_len":153}}
+{"ts":1769202644.516513,"ts_iso":"2026-01-23T21:10:44.516Z","kind":"controller.start","data":{"instance_id":"example-1","repo":"/private/var/folders/x6/42fsszcj2rnckgr8nssp2sy00000gn/T/pytest-of-ameet/pytest-24/test_run_controller_applies_co0","failing_tests":1,"test_cmd":"pytest -k add"}}
+{"ts":1769202644.531265,"ts_iso":"2026-01-23T21:10:44.531Z","kind":"vcs.checkpoint","data":{"baseline":"93a6316cb97546e12e1353a794463375a72fa212"}}
+{"ts":1769202644.5316281,"ts_iso":"2026-01-23T21:10:44.531Z","kind":"file.write","data":{"name":"candidates","path":".agent_runs/example-1/candidates.json"}}
+{"ts":1769202644.531702,"ts_iso":"2026-01-23T21:10:44.531Z","kind":"candidates.recalled","data":{"count":1}}
+{"ts":1769202644.531743,"ts_iso":"2026-01-23T21:10:44.531Z","kind":"candidates.probed","data":{"count":1}}
+{"ts":1769202644.5317838,"ts_iso":"2026-01-23T21:10:44.531Z","kind":"planner.synthesize.start","data":{}}
+{"ts":1769202644.531828,"ts_iso":"2026-01-23T21:10:44.531Z","kind":"planner.synthesize.done","data":{"steps":1}}
+{"ts":1769202644.532115,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"file.write","data":{"name":"understanding","path":".agent_runs/example-1/understanding.json"}}
+{"ts":1769202644.532243,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"file.write","data":{"name":"plan","path":".agent_runs/example-1/plan.json"}}
+{"ts":1769202644.532275,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"step.begin","data":{"step_id":"step-1","intent":"Fix add"}}
+{"ts":1769202644.5323992,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"step.test_cmd","data":{"step_id":"step-1","test_cmd":"pytest -q -k \"test_add\""}}
+{"ts":1769202644.532425,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"proposer.start","data":{"step_id":"step-1"}}
+{"ts":1769202644.5324512,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"proposer.done","data":{"step_id":"step-1","proposals":1,"shortlisted":1}}
+{"ts":1769202644.532487,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"txn.start","data":{"step_id":"step-1","actions":3}}
+{"ts":1769202644.5325189,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"txn.result","data":{"step_id":"step-1","committed":true,"mu_pre":0,"mu_post":1}}
+{"ts":1769202644.5326238,"ts_iso":"2026-01-23T21:10:44.532Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
+{"ts":1769202644.549439,"ts_iso":"2026-01-23T21:10:44.549Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
+{"ts":1769202644.54954,"ts_iso":"2026-01-23T21:10:44.549Z","kind":"controller.finish","data":{"final_patch_len":113}}
+{"ts":1769202665.5092218,"ts_iso":"2026-01-23T21:11:05.509Z","kind":"controller.start","data":{"instance_id":"example-1","repo":"/private/var/folders/x6/42fsszcj2rnckgr8nssp2sy00000gn/T/pytest-of-ameet/pytest-25/test_run_controller_applies_co0","failing_tests":1,"test_cmd":"pytest -k add"}}
+{"ts":1769202665.522733,"ts_iso":"2026-01-23T21:11:05.522Z","kind":"vcs.checkpoint","data":{"baseline":"7bc2996a1abac8e758f2c7a1d8bcd76bba34a266"}}
+{"ts":1769202665.523128,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"file.write","data":{"name":"candidates","path":".agent_runs/example-1/candidates.json"}}
+{"ts":1769202665.5231628,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"candidates.recalled","data":{"count":1}}
+{"ts":1769202665.5231922,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"candidates.probed","data":{"count":1}}
+{"ts":1769202665.52322,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"planner.synthesize.start","data":{}}
+{"ts":1769202665.523253,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"planner.synthesize.done","data":{"steps":1}}
+{"ts":1769202665.5233521,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"file.write","data":{"name":"understanding","path":".agent_runs/example-1/understanding.json"}}
+{"ts":1769202665.5234408,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"file.write","data":{"name":"plan","path":".agent_runs/example-1/plan.json"}}
+{"ts":1769202665.5234659,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"step.begin","data":{"step_id":"step-1","intent":"Fix add"}}
+{"ts":1769202665.523585,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"step.test_cmd","data":{"step_id":"step-1","test_cmd":"pytest -q -k \"test_add\""}}
+{"ts":1769202665.523615,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"proposer.start","data":{"step_id":"step-1"}}
+{"ts":1769202665.523638,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"proposer.done","data":{"step_id":"step-1","proposals":1,"shortlisted":1}}
+{"ts":1769202665.523659,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"txn.start","data":{"step_id":"step-1","actions":3}}
+{"ts":1769202665.523714,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"txn.result","data":{"step_id":"step-1","committed":true,"mu_pre":0,"mu_post":1}}
+{"ts":1769202665.523854,"ts_iso":"2026-01-23T21:11:05.523Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
+{"ts":1769202665.5385869,"ts_iso":"2026-01-23T21:11:05.538Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
+{"ts":1769202665.5386722,"ts_iso":"2026-01-23T21:11:05.538Z","kind":"controller.finish","data":{"final_patch_len":113}}
+{"ts":1769202665.619345,"ts_iso":"2026-01-23T21:11:05.619Z","kind":"controller.start","data":{"instance_id":"example-1","repo":"/private/var/folders/x6/42fsszcj2rnckgr8nssp2sy00000gn/T/pytest-of-ameet/pytest-25/test_run_controller_processes_0","failing_tests":1,"test_cmd":"pytest -k add"}}
+{"ts":1769202665.633097,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"vcs.checkpoint","data":{"baseline":"7bc2996a1abac8e758f2c7a1d8bcd76bba34a266"}}
+{"ts":1769202665.633462,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"file.write","data":{"name":"candidates","path":".agent_runs/example-1/candidates.json"}}
+{"ts":1769202665.633506,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"candidates.recalled","data":{"count":1}}
+{"ts":1769202665.633536,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"candidates.probed","data":{"count":1}}
+{"ts":1769202665.633565,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"planner.synthesize.start","data":{}}
+{"ts":1769202665.633601,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"planner.synthesize.done","data":{"steps":2}}
+{"ts":1769202665.633704,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"file.write","data":{"name":"understanding","path":".agent_runs/example-1/understanding.json"}}
+{"ts":1769202665.633826,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"file.write","data":{"name":"plan","path":".agent_runs/example-1/plan.json"}}
+{"ts":1769202665.633853,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"step.begin","data":{"step_id":"step-1","intent":"Fix add"}}
+{"ts":1769202665.633972,"ts_iso":"2026-01-23T21:11:05.633Z","kind":"step.test_cmd","data":{"step_id":"step-1","test_cmd":"pytest -q -k \"test_add\""}}
+{"ts":1769202665.633999,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"proposer.start","data":{"step_id":"step-1"}}
+{"ts":1769202665.634024,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"proposer.done","data":{"step_id":"step-1","proposals":1,"shortlisted":1}}
+{"ts":1769202665.634045,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"txn.start","data":{"step_id":"step-1","actions":3}}
+{"ts":1769202665.634071,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"txn.result","data":{"step_id":"step-1","committed":true,"mu_pre":0,"mu_post":1}}
+{"ts":1769202665.634094,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"step.begin","data":{"step_id":"step-2","intent":"Add docstring"}}
+{"ts":1769202665.634146,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"proposer.start","data":{"step_id":"step-2"}}
+{"ts":1769202665.6341681,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"proposer.done","data":{"step_id":"step-2","proposals":1,"shortlisted":1}}
+{"ts":1769202665.6341891,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"txn.start","data":{"step_id":"step-2","actions":3}}
+{"ts":1769202665.63421,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"txn.result","data":{"step_id":"step-2","committed":true,"mu_pre":1,"mu_post":1}}
+{"ts":1769202665.634285,"ts_iso":"2026-01-23T21:11:05.634Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
+{"ts":1769202665.648044,"ts_iso":"2026-01-23T21:11:05.648Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
+{"ts":1769202665.648132,"ts_iso":"2026-01-23T21:11:05.648Z","kind":"controller.finish","data":{"final_patch_len":94}}
+{"ts":1769202666.030723,"ts_iso":"2026-01-23T21:11:06.030Z","kind":"controller.start","data":{"instance_id":"example-1","repo":"/private/var/folders/x6/42fsszcj2rnckgr8nssp2sy00000gn/T/pytest-of-ameet/pytest-25/test_end_to_end_smoke_with_ope0/repo","failing_tests":1,"test_cmd":"pytest -k add"}}
+{"ts":1769202666.0440462,"ts_iso":"2026-01-23T21:11:06.044Z","kind":"vcs.checkpoint","data":{"baseline":"24d2c550b880bd8c50572cbc9f4a9fe4f8d03df6"}}
+{"ts":1769202666.045254,"ts_iso":"2026-01-23T21:11:06.045Z","kind":"file.write","data":{"name":"candidates","path":".agent_runs/example-1/candidates.json"}}
+{"ts":1769202666.04529,"ts_iso":"2026-01-23T21:11:06.045Z","kind":"candidates.recalled","data":{"count":1}}
+{"ts":1769202666.0455549,"ts_iso":"2026-01-23T21:11:06.045Z","kind":"candidates.probed","data":{"count":1}}
+{"ts":1769202666.045595,"ts_iso":"2026-01-23T21:11:06.045Z","kind":"planner.synthesize.start","data":{}}
+{"ts":1769202666.046977,"ts_iso":"2026-01-23T21:11:06.046Z","kind":"planner.synthesize.done","data":{"steps":1}}
+{"ts":1769202666.047101,"ts_iso":"2026-01-23T21:11:06.047Z","kind":"file.write","data":{"name":"understanding","path":".agent_runs/example-1/understanding.json"}}
+{"ts":1769202666.0472162,"ts_iso":"2026-01-23T21:11:06.047Z","kind":"file.write","data":{"name":"plan","path":".agent_runs/example-1/plan.json"}}
+{"ts":1769202666.047253,"ts_iso":"2026-01-23T21:11:06.047Z","kind":"step.begin","data":{"step_id":"step-1","intent":"Fix add"}}
+{"ts":1769202666.047341,"ts_iso":"2026-01-23T21:11:06.047Z","kind":"step.test_cmd","data":{"step_id":"step-1","test_cmd":"pytest -q -k \"test_add\""}}
+{"ts":1769202666.047372,"ts_iso":"2026-01-23T21:11:06.047Z","kind":"proposer.start","data":{"step_id":"step-1"}}
+{"ts":1769202666.047474,"ts_iso":"2026-01-23T21:11:06.047Z","kind":"proposer.done","data":{"step_id":"step-1","proposals":1,"shortlisted":1}}
+{"ts":1769202666.047498,"ts_iso":"2026-01-23T21:11:06.047Z","kind":"txn.start","data":{"step_id":"step-1","actions":3}}
+{"ts":1769202666.1097999,"ts_iso":"2026-01-23T21:11:06.109Z","kind":"txn.result","data":{"step_id":"step-1","committed":true,"mu_pre":0,"mu_post":0}}
+{"ts":1769202666.1101172,"ts_iso":"2026-01-23T21:11:06.110Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
+{"ts":1769202666.1241322,"ts_iso":"2026-01-23T21:11:06.124Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
+{"ts":1769202666.1242392,"ts_iso":"2026-01-23T21:11:06.124Z","kind":"controller.finish","data":{"final_patch_len":153}}
+{"ts":1769203013.017267,"ts_iso":"2026-01-23T21:16:53.017Z","kind":"controller.start","data":{"instance_id":"example-1","repo":"/private/var/folders/x6/42fsszcj2rnckgr8nssp2sy00000gn/T/pytest-of-ameet/pytest-26/test_run_controller_applies_co0","failing_tests":1,"test_cmd":"pytest -k add"}}
+{"ts":1769203013.029778,"ts_iso":"2026-01-23T21:16:53.029Z","kind":"vcs.checkpoint","data":{"baseline":"10502738c47f6f55ea8975f4d54e60dd687e836b"}}
+{"ts":1769203013.030108,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"file.write","data":{"name":"candidates","path":".agent_runs/example-1/candidates.json"}}
+{"ts":1769203013.030144,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"candidates.recalled","data":{"count":1}}
+{"ts":1769203013.0301728,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"candidates.probed","data":{"count":1}}
+{"ts":1769203013.030199,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"planner.synthesize.start","data":{}}
+{"ts":1769203013.030236,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"planner.synthesize.done","data":{"steps":1}}
+{"ts":1769203013.030321,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"file.write","data":{"name":"understanding","path":".agent_runs/example-1/understanding.json"}}
+{"ts":1769203013.0304132,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"file.write","data":{"name":"plan","path":".agent_runs/example-1/plan.json"}}
+{"ts":1769203013.0304372,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"step.begin","data":{"step_id":"step-1","intent":"Fix add"}}
+{"ts":1769203013.0305421,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"step.test_cmd","data":{"step_id":"step-1","test_cmd":"pytest -q -k \"test_add\""}}
+{"ts":1769203013.030566,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"proposer.start","data":{"step_id":"step-1"}}
+{"ts":1769203013.03059,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"proposer.done","data":{"step_id":"step-1","proposals":1,"shortlisted":1}}
+{"ts":1769203013.030613,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"txn.start","data":{"step_id":"step-1","actions":3}}
+{"ts":1769203013.030645,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"txn.result","data":{"step_id":"step-1","committed":true,"mu_pre":0,"mu_post":1}}
+{"ts":1769203013.0307279,"ts_iso":"2026-01-23T21:16:53.030Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
+{"ts":1769203013.043346,"ts_iso":"2026-01-23T21:16:53.043Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
+{"ts":1769203013.043419,"ts_iso":"2026-01-23T21:16:53.043Z","kind":"controller.finish","data":{"final_patch_len":113}}
+{"ts":1769203013.1146739,"ts_iso":"2026-01-23T21:16:53.114Z","kind":"controller.start","data":{"instance_id":"example-1","repo":"/private/var/folders/x6/42fsszcj2rnckgr8nssp2sy00000gn/T/pytest-of-ameet/pytest-26/test_run_controller_processes_0","failing_tests":1,"test_cmd":"pytest -k add"}}
+{"ts":1769203013.1270158,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"vcs.checkpoint","data":{"baseline":"10502738c47f6f55ea8975f4d54e60dd687e836b"}}
+{"ts":1769203013.127292,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"file.write","data":{"name":"candidates","path":".agent_runs/example-1/candidates.json"}}
+{"ts":1769203013.1273332,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"candidates.recalled","data":{"count":1}}
+{"ts":1769203013.127365,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"candidates.probed","data":{"count":1}}
+{"ts":1769203013.1273952,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"planner.synthesize.start","data":{}}
+{"ts":1769203013.127434,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"planner.synthesize.done","data":{"steps":2}}
+{"ts":1769203013.127517,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"file.write","data":{"name":"understanding","path":".agent_runs/example-1/understanding.json"}}
+{"ts":1769203013.127616,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"file.write","data":{"name":"plan","path":".agent_runs/example-1/plan.json"}}
+{"ts":1769203013.127645,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"step.begin","data":{"step_id":"step-1","intent":"Fix add"}}
+{"ts":1769203013.127758,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"step.test_cmd","data":{"step_id":"step-1","test_cmd":"pytest -q -k \"test_add\""}}
+{"ts":1769203013.1278021,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"proposer.start","data":{"step_id":"step-1"}}
+{"ts":1769203013.127842,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"proposer.done","data":{"step_id":"step-1","proposals":1,"shortlisted":1}}
+{"ts":1769203013.127868,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"txn.start","data":{"step_id":"step-1","actions":3}}
+{"ts":1769203013.127906,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"txn.result","data":{"step_id":"step-1","committed":true,"mu_pre":0,"mu_post":1}}
+{"ts":1769203013.1279318,"ts_iso":"2026-01-23T21:16:53.127Z","kind":"step.begin","data":{"step_id":"step-2","intent":"Add docstring"}}
+{"ts":1769203013.128006,"ts_iso":"2026-01-23T21:16:53.128Z","kind":"proposer.start","data":{"step_id":"step-2"}}
+{"ts":1769203013.128027,"ts_iso":"2026-01-23T21:16:53.128Z","kind":"proposer.done","data":{"step_id":"step-2","proposals":1,"shortlisted":1}}
+{"ts":1769203013.128054,"ts_iso":"2026-01-23T21:16:53.128Z","kind":"txn.start","data":{"step_id":"step-2","actions":3}}
+{"ts":1769203013.128082,"ts_iso":"2026-01-23T21:16:53.128Z","kind":"txn.result","data":{"step_id":"step-2","committed":true,"mu_pre":1,"mu_post":1}}
+{"ts":1769203013.128181,"ts_iso":"2026-01-23T21:16:53.128Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
+{"ts":1769203013.14114,"ts_iso":"2026-01-23T21:16:53.141Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
+{"ts":1769203013.14123,"ts_iso":"2026-01-23T21:16:53.141Z","kind":"controller.finish","data":{"final_patch_len":94}}
+{"ts":1769203013.495475,"ts_iso":"2026-01-23T21:16:53.495Z","kind":"controller.start","data":{"instance_id":"example-1","repo":"/private/var/folders/x6/42fsszcj2rnckgr8nssp2sy00000gn/T/pytest-of-ameet/pytest-26/test_end_to_end_smoke_with_ope0/repo","failing_tests":1,"test_cmd":"pytest -k add"}}
+{"ts":1769203013.508236,"ts_iso":"2026-01-23T21:16:53.508Z","kind":"vcs.checkpoint","data":{"baseline":"10502738c47f6f55ea8975f4d54e60dd687e836b"}}
+{"ts":1769203013.509299,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"file.write","data":{"name":"candidates","path":".agent_runs/example-1/candidates.json"}}
+{"ts":1769203013.509343,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"candidates.recalled","data":{"count":1}}
+{"ts":1769203013.50942,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"candidates.probed","data":{"count":1}}
+{"ts":1769203013.509444,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"planner.synthesize.start","data":{}}
+{"ts":1769203013.509563,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"planner.synthesize.done","data":{"steps":1}}
+{"ts":1769203013.509652,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"file.write","data":{"name":"understanding","path":".agent_runs/example-1/understanding.json"}}
+{"ts":1769203013.509737,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"file.write","data":{"name":"plan","path":".agent_runs/example-1/plan.json"}}
+{"ts":1769203013.509761,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"step.begin","data":{"step_id":"step-1","intent":"Fix add"}}
+{"ts":1769203013.5098329,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"step.test_cmd","data":{"step_id":"step-1","test_cmd":"pytest -q -k \"test_add\""}}
+{"ts":1769203013.509855,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"proposer.start","data":{"step_id":"step-1"}}
+{"ts":1769203013.5099268,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"proposer.done","data":{"step_id":"step-1","proposals":1,"shortlisted":1}}
+{"ts":1769203013.5099509,"ts_iso":"2026-01-23T21:16:53.509Z","kind":"txn.start","data":{"step_id":"step-1","actions":3}}
+{"ts":1769203013.568662,"ts_iso":"2026-01-23T21:16:53.568Z","kind":"txn.result","data":{"step_id":"step-1","committed":true,"mu_pre":0,"mu_post":0}}
+{"ts":1769203013.5689769,"ts_iso":"2026-01-23T21:16:53.568Z","kind":"file.write","data":{"name":"transactions","path":".agent_runs/example-1/transactions.json"}}
+{"ts":1769203013.583097,"ts_iso":"2026-01-23T21:16:53.583Z","kind":"file.write","data":{"name":"final_patch","path":".agent_runs/example-1/final_patch.txt"}}
+{"ts":1769203013.583165,"ts_iso":"2026-01-23T21:16:53.583Z","kind":"controller.finish","data":{"final_patch_len":153}}

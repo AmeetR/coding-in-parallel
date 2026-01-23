@@ -1,6 +1,6 @@
 diff --git a/__pycache__/mod.cpython-312.pyc b/__pycache__/mod.cpython-312.pyc
 new file mode 100644
-index 0000000..6198aef
+index 0000000..3a59b02
 Binary files /dev/null and b/__pycache__/mod.cpython-312.pyc differ
 diff --git a/mod.py b/mod.py
 index 2edf820..463d462 100644

@@ -35,6 +35,7 @@ class LimitsConfig:
     max_loc_changes: int = 12
     max_files_per_diff: int = 2
     slice_padding_lines: int = 80
+    enforce_hammock_allowlists: bool = False
 
 
 @dataclass(frozen=True)

@@ -17,6 +17,7 @@ limits:
   max_loc_changes: 12
   max_files_per_diff: 2
   slice_padding_lines: 80
+  enforce_hammock_allowlists: false
 
 tnr:
   actions_per_txn: 3

@@ -1,12 +1,6 @@
 [
   {
-    "allowlists": [
-      [
-        "mod.py",
-        1,
-        2
-      ]
-    ],
+    "allowlists": [],
     "check": "tests",
     "constraints": [],
     "id": "step-1",

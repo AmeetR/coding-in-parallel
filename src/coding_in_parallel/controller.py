@@ -61,8 +61,12 @@ def _derive_test_cmd(ctx: types.TaskContext, cfg: config_module.Config) -> str:
 def _attach_hammock_allowlists(
     repo_path: str,
     plan: List[types.PlanStep],
+    *,
+    enabled: bool,
 ) -> List[types.PlanStep]:
     """Attach Stage‑A hammock allowlists to plan steps."""
+    if not enabled:
+        return plan
     hammocks = localize.extract_hammocks_stage_a(Path(repo_path))
     updated: List[types.PlanStep] = []
     for step in plan:
@@ -234,8 +238,12 @@ def run_controller(
         plan = planner.plan(understanding)[: cfg.search.max_steps]
         logger.log_event("planner.synthesize.done", steps=len(plan))
 
-    # Attach hammock allowlists for tighter edit windows
-    plan = _attach_hammock_allowlists(ctx.repo_path, plan)
+    # Attach hammock allowlists for tighter edit windows (optional)
+    plan = _attach_hammock_allowlists(
+        ctx.repo_path,
+        plan,
+        enabled=getattr(cfg.limits, "enforce_hammock_allowlists", False),
+    )
 
     # Log the understanding and plan
     logger.log_json("understanding", {
